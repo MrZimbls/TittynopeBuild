@@ -1,0 +1,11 @@
+name: TittynopeBuild
+version: 0.1
+author: Zimbls
+main: org.tittynope.TittynopeBuild
+api-version: 1.20
+
+commands:
+  map:
+    description: A command to create and manage Maps
+    usage: /map <listall/create>
+    permission: tittynopebuild.map
