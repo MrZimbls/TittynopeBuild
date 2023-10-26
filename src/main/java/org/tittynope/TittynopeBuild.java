@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
 public class TittynopeBuild extends JavaPlugin {
@@ -48,8 +49,9 @@ public class TittynopeBuild extends JavaPlugin {
         this.getCommand("map").setExecutor(new MapCommands());
 
         String[] datafiles = file.list();
-        if (datafiles.length > 0){
-            Data buffer = new Data(Data.loadData("plugins/TittynopeBuild/data/mapsdata.data"));
+
+        if (datafiles != null){
+            Data buffer = new Data(Objects.requireNonNull(Data.loadData("plugins/TittynopeBuild/data/mapsdata.data")));
             mapList = buffer.getMapList();
             serverPlayer = buffer.getAllplayer();
 
@@ -65,8 +67,7 @@ public class TittynopeBuild extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        boolean saved = new Data(mapList, serverPlayer).saveData("plugins/TittynopeBuild/data/mapsdata.data");
-        if (saved){
+        if (saveData()){
             getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[TittyBuild]: Maps saved successfully!");
         }
         getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[TittyBuild]: Plugin is disabled!");
@@ -148,6 +149,10 @@ public class TittynopeBuild extends JavaPlugin {
 
     public static void sendToSpawn(Player player){
         player.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
+    }
+
+    public static boolean saveData(){
+        return new Data(mapList, serverPlayer).saveData("plugins/TittynopeBuild/data/mapsdata.data");
     }
 
     public static TittynopeBuild getPlugin() {

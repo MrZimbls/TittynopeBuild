@@ -2,50 +2,51 @@ package org.tittynope.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.UUID;
 
 public class SkullBuilder {
 
-    /* Since version 1.16.1, UUIDs in NBT tags are no longer serialised as strings,
-       but as an int array of 4 x 32 bits, going from most significant to least significant
-       bits of the UUID. */
-    private static final boolean newStorageSystem;
+    private static final UUID RANDOM_UUID = UUID.randomUUID(); // We reuse the same "random" UUID all the time
 
-    static {
-        String versionString = Bukkit.getBukkitVersion();
-        int[] version = Arrays.stream(versionString.substring(0, versionString.indexOf('-')).split("\\."))
-                .mapToInt(Integer::parseInt)
-                .toArray();
-        newStorageSystem = version[0] > 1
-                || (version[0] == 1 && version[1] > 16)
-                || (version[0] == 1 && version[1] == 16 && version[2] >= 1);
+    private static PlayerProfile getProfile(String url) {
+        PlayerProfile profile = Bukkit.createPlayerProfile(RANDOM_UUID); // Get a new player profile
+        PlayerTextures textures = profile.getTextures();
+        URL urlObject;
+        try {
+            urlObject = new URL(url); // The URL to the skin, for example: https://textures.minecraft.net/texture/18813764b2abc94ec3c3bc67b9147c21be850cdf996679703157f4555997ea63a
+        } catch (MalformedURLException exception) {
+            throw new RuntimeException("Invalid URL", exception);
+        }
+        textures.setSkin(urlObject); // Set the skin of the player profile to the URL
+        profile.setTextures(textures); // Set the textures back to the profile
+        return profile;
     }
-
-    /**
-     * Creates a skull item stack that uses the given base64-encoded texture
-     *
-     * @param texture The texture value. Can be found on e.g. https://minecraft-heads.com/custom-heads/
-     *                in the "Value" field.
-     * @return an ItemStack with this texture.
-     */
     public static ItemStack create(String texture) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
-
-        // Assuming you have some method to set the texture to the skull.
-        // This method might be specific to the library or plugin you're using.
-        setTextureToSkullMeta(skullMeta, texture);
-
-        item.setItemMeta(skullMeta);
-        return item;
+        PlayerProfile profile = null;
+        try {
+            profile = getProfile(getUrlFromBase64(texture));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        meta.setOwnerProfile(profile); // Set the owning player of the head to the player profile
+        head.setItemMeta(meta);
+        return head;
     }
 
-    private static void setTextureToSkullMeta(SkullMeta skullMeta, String texture) {
-        // Implement the method to set the texture to the SkullMeta.
-        // The implementation is dependent on the library or plugin you're using.
+    public static String getUrlFromBase64(String base64) throws MalformedURLException {
+        String decoded = new String(Base64.getDecoder().decode(base64));
+        return decoded.substring("{\"textures\":{\"SKIN\":{\"url\":\"".length(), decoded.length() - "\"}}}".length());
     }
 }

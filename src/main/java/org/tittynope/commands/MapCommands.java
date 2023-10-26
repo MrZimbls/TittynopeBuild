@@ -64,6 +64,7 @@ public class MapCommands implements CommandExecutor {
                         player.sendMessage("Generating new world");
                         World world = new WorldGernerateHandler(args[1], player).voidWorld();
                         player.teleport(world.getSpawnLocation());
+                        TittynopeBuild.saveData();
                     }
                 }
                 else if (args[0].equalsIgnoreCase("tp")){
