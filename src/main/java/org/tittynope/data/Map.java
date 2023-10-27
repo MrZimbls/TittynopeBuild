@@ -123,7 +123,6 @@ public class Map implements Serializable, Comparable<Map> {
 
     public void registerFlagEvents(){
         for (String flagName : flags.keySet()){
-            Bukkit.getServer().broadcast("test", flagName);
             Bukkit.getPluginManager().registerEvents(flags.get(flagName), TittynopeBuild.getPlugin());
         }
     }

@@ -14,9 +14,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class MapImportHandler {
-    public static void importFromFolder(String name, Player p) throws IOException {
-        if (TittynopeBuild.getMapHashMap().containsKey(name)){
-            p.sendMessage(ChatColor.RED + "Map already exitists!");
+    public static void importFromFolder(String name, Player p, WorldType worldType, Long seed) throws IOException {
+        if (TittynopeBuild.getMapHashMap().containsKey(name)) {
+            p.sendMessage(ChatColor.RED + "Map already exists!");
             return;
         }
         String copied = Bukkit.getServer().getWorldContainer().toString() + "/" + name;
@@ -34,12 +34,22 @@ public class MapImportHandler {
                 });
 
         Map tempMap = new Map(name, p.getUniqueId());
-        tempMap.setGenerator("VOID");
-        TittynopeBuild.addMaptoList(tempMap);
 
         WorldCreator wc = new WorldCreator(name);
-        wc.generator(new VoidChunkGenerator());
-        wc.type(WorldType.FLAT);
+
+        if (worldType == null) {
+            tempMap.setGenerator("VOID");
+            wc.generator(new VoidChunkGenerator());
+            wc.type(WorldType.FLAT);
+        } else {
+            wc.type(worldType);
+            if (seed != null) {
+                wc.seed(seed);
+            }
+        }
+
+        TittynopeBuild.addMaptoList(tempMap);
         Bukkit.getServer().createWorld(wc);
     }
+
 }

@@ -1,5 +1,6 @@
 package org.tittynope.commands;
 
+import org.bukkit.WorldType;
 import org.tittynope.TittynopeBuild;
 import org.tittynope.data.Map;
 import org.tittynope.handler.MapImportHandler;
@@ -17,6 +18,8 @@ import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.util.UUID;
+
+import static java.lang.Long.parseLong;
 
 public class MapCommands implements CommandExecutor {
     @Override
@@ -85,7 +88,7 @@ public class MapCommands implements CommandExecutor {
                 }
                 else if (args[0].equalsIgnoreCase("import")){
                     try {
-                        MapImportHandler.importFromFolder(args[1], player);
+                        MapImportHandler.importFromFolder(args[1], player, null, null);
                         player.sendMessage(ChatColor.GREEN + "Map imported");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -95,6 +98,20 @@ public class MapCommands implements CommandExecutor {
             }
             else if (args.length == 3){
 
+            }
+            else if (args.length == 4){
+                if (args[0].equalsIgnoreCase("import")){
+                    if (args[2].equals("large")) {
+                        player.sendMessage(ChatColor.GRAY + "Trying to import map: " + args[1]);
+                        try {
+                            MapImportHandler.importFromFolder(args[1], player, WorldType.LARGE_BIOMES, parseLong(args[3]));
+                            player.sendMessage(ChatColor.GREEN + "Map imported");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            player.sendMessage(ChatColor.RED + "A file with this name dose not exist!");
+                        }
+                    }
+                }
             }
         }
 
